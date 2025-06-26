@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Chat con IA</title>
+  <style>
+    body { font-family: sans-serif; margin: 0; padding: 10px; background: #f5f5f5; }
+    #chat { max-height: 450px; overflow-y: auto; margin-bottom: 10px; border: 1px solid #ccc; padding: 10px; background: white; }
+    .msg { margin: 5px 0; }
+    .bot { color: #007aff; }
+    .user { text-align: right; color: #444; }
+    input { width: 100%; padding: 10px; border: 1px solid #ccc; }
+  </style>
+</head>
+<body>
+  <div id="chat"></div>
+  <input id="msgInput" placeholder="Escribí tu mensaje..." />
+  <script>
+    const webhookUrl = "https://tuservidor.com/webhook/chatbot"; // 🔁 reemplazar con tu URL real
+
+    const chat = document.getElementById("chat");
+    const input = document.getElementById("msgInput");
+
+    input.addEventListener("keypress", function (e) {
+      if (e.key === "Enter") {
+        const text = input.value.trim();
+        if (!text) return;
+        appendMsg(text, "user");
+        input.value = "";
+
+        fetch(webhookUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: text })
+        })
+        .then(res => res.json())
+        .then(data => {
+          const reply = data.message || data.text || "Sin respuesta.";
+          appendMsg(reply, "bot");
+        })
+        .catch(err => {
+          appendMsg("Error de conexión.", "bot");
+        });
+      }
+    });
+
+    function appendMsg(text, cls) {
+      const div = document.createElement("div");
+      div.className = "msg " + cls;
+      div.innerText = text;
+      chat.appendChild(div);
+      chat.scrollTop = chat.scrollHeight;
+    }
+  </script>
+</body>
+</html>
